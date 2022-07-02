@@ -6,6 +6,9 @@
 package SIG.veiw;
 
 import SIG.controller.ActionHandler;
+import SIG.model.InvoiceHeader;
+import SIG.model.InvoiceHeaderTable;
+import java.util.ArrayList;
 import javax.swing.JTextField;
 
 /**
@@ -18,7 +21,7 @@ public class invoice extends javax.swing.JFrame {
      * Creates new form invoice
      */
     public invoice() {
-        this.handler = new ActionHandler();
+        this.handler = new ActionHandler(this);
         initComponents();
     }
 
@@ -33,9 +36,11 @@ public class invoice extends javax.swing.JFrame {
 
         jScrollPane1 = new javax.swing.JScrollPane();
         invoHeader = new javax.swing.JTable();
+        invoHeader.getSelectionModel().addListSelectionListener(handler);
         newInvoice = new javax.swing.JButton();
         newInvoice.addActionListener(handler);
         delInvoice = new javax.swing.JButton();
+        delInvoice.addActionListener(handler);
         jScrollPane2 = new javax.swing.JScrollPane();
         invoLine = new javax.swing.JTable();
         jLabel1 = new javax.swing.JLabel();
@@ -62,23 +67,12 @@ public class invoice extends javax.swing.JFrame {
 
         invoHeader.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+
             },
             new String [] {
-                "Num", "Date", "Name", "Total"
-            }
-        ) {
-            Class[] types = new Class [] {
-                java.lang.Integer.class, java.lang.Object.class, java.lang.String.class, java.lang.Double.class
-            };
 
-            public Class getColumnClass(int columnIndex) {
-                return types [columnIndex];
             }
-        });
+        ));
         invoHeader.setOpaque(false);
         invoHeader.addAncestorListener(new javax.swing.event.AncestorListener() {
             public void ancestorMoved(javax.swing.event.AncestorEvent evt) {
@@ -108,13 +102,10 @@ public class invoice extends javax.swing.JFrame {
 
         invoLine.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+
             },
             new String [] {
-                "Invoice", "Num", "Price", "Title 4"
+
             }
         ));
         jScrollPane2.setViewportView(invoLine);
@@ -329,12 +320,35 @@ public class invoice extends javax.swing.JFrame {
     private javax.swing.JMenuItem saveMenu;
     private javax.swing.JLabel totalLabel;
     // End of variables declaration//GEN-END:variables
-private ActionHandler handler = new ActionHandler();
+private ActionHandler handler ;
+private ArrayList<InvoiceHeader>invList;
+private InvoiceHeaderTable InvHTable;
 
+    public ActionHandler getHandler() {
+        return handler;
+    }
+
+    public ArrayList<InvoiceHeader> getInvList() {
+        return invList;
+    }
+
+    public void setInvList(ArrayList<InvoiceHeader> invList) {
+        this.invList = invList;
+        InvHTable =new InvoiceHeaderTable(invList);
+        this.invoHeader.setModel(InvHTable);
+    }
+     
     public javax.swing.JTable getInvoHeader() {
         return invoHeader;
     }
+    
+    public javax.swing.JTable getInvoLine() {
+        return invoLine;
+    }
+    
 
+    
+    
     public void setjTextField1(JTextField jTextField1) {
         this.jTextField1 = jTextField1;
     }
@@ -342,6 +356,7 @@ private ActionHandler handler = new ActionHandler();
     public JTextField getjTextField1() {
         return jTextField1;
     }
+
     
     
     

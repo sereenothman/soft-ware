@@ -12,13 +12,14 @@ import java.util.Date;
  *
  * @author seren
  */
-public class InvouceHeader {
-    private int num;
-    private String customer ;
-    private Date date; 
-    private ArrayList<InvoiceLine>lines;
+public class InvoiceHeader {
 
-    public InvouceHeader(int num, String customer, Date date) {
+    private int num;
+    private String customer;
+    private String date;
+    private ArrayList<InvoiceLine> lines;
+
+    public InvoiceHeader(int num, String customer, String date) {
         this.num = num;
         this.customer = customer;
         this.date = date;
@@ -32,11 +33,14 @@ public class InvouceHeader {
         return customer;
     }
 
-    public Date getDate() {
+    public String getDate() {
         return date;
     }
 
     public ArrayList<InvoiceLine> getLines() {
+        if (lines == null) {
+            lines = new ArrayList<>();
+        }
         return lines;
     }
 
@@ -48,9 +52,17 @@ public class InvouceHeader {
         this.customer = customer;
     }
 
-    public void setLines(ArrayList<InvoiceLine> lines) {
-        this.lines = lines;
+    public double getTotal() {
+        double total = 0;
+        for (InvoiceLine line : getLines()) {
+            total += line.LineTotal();
+        }
+        return total;
     }
-    
-    
+
+    @Override
+    public String toString() {
+        return "InvouceHeader{" + "num=" + num + ", customer=" + customer + ", date=" + date + '}';
+    }
+
 }

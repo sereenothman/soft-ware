@@ -5,6 +5,9 @@
  */
 package SIG.controller;
 
+import SIG.model.InvoiceHeader;
+import SIG.model.InvoiceLine;
+import SIG.model.InvoiceLineTable;
 import SIG.veiw.invoice;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,19 +17,33 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import com.opencsv.CSVReader;
+import static com.sun.corba.se.impl.util.Utility.printStackTrace;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 
 /**
  *
  * @author seren
  */
-public class ActionHandler implements ActionListener {
+public class ActionHandler implements ActionListener, ListSelectionListener {
+
+    private invoice inv;//reference frm the invoice class
+
+    public ActionHandler(invoice aThis) {
+        this.inv = aThis;
+    }
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -50,11 +67,10 @@ public class ActionHandler implements ActionListener {
                 System.out.println("called");
                 loadFile();
                 break;
-            /*case "Save File":
+            case "Save File":
                 saveFile();
-                break;*/
+                break;
         }
-        
 
     }
 
@@ -63,7 +79,10 @@ public class ActionHandler implements ActionListener {
     }
 
     private void deleteInvoice() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        int selectedRow=inv.getInvoHeader().getSelectedRow();
+        ArrayList<InvoiceHeader> invList = new ArrayList<>();
+        invList.remove(selectedRow);
+        
     }
 
     private void newItem() {
@@ -71,57 +90,93 @@ public class ActionHandler implements ActionListener {
     }
 
     private void deleteItem() {
-        JOptionPane.showMessageDialog(null,"Welcome swing","plane message",JOptionPane.ERROR_MESSAGE);
+        JOptionPane.showMessageDialog(null, "Welcome swing", "plane message", JOptionPane.ERROR_MESSAGE);
     }
 
     private void loadFile() {
-        invoice in = new invoice();
-        JFileChooser fc = new JFileChooser();
-        int result = fc.showOpenDialog(fc);
-        if (result == JFileChooser.APPROVE_OPTION) {
-            //String path = fc.getSelectedFile().getPath();
-            File file = fc.getSelectedFile();
-            ArrayList<String[]> rows = readCSV(file);
-            
-            
-            //FileInputStream fis=null;
-            //try {
-            //fis = new FileInputStream(path);
-            //int size = fis.available();
-            //byte[] b = new byte[size];
-            //fis.read(b); 
-            //while ()
-            //in.getInvoHeader().setText(new String(b));
-            // } catch (FileNotFoundException ex) {
-            //ex.printStackTrace();
-            //} catch (IOException ex) {
-            //ex.printStackTrace();
-            //} finally {
-            //try {fis.close();}
-            //catch(IOException ex){}
-            //}
-        }
-    }
-
-    private ArrayList<String[]> readCSV(File file) {
-        ArrayList<String[]> data = new ArrayList<>();
         try {
-            FileReader filereader = new FileReader(file);
-            CSVReader csvreader = new CSVReader(filereader);
-            Iterator<String[]> rows = csvreader.iterator();
+            JFileChooser fc = new JFileChooser();
+            int result = fc.showOpenDialog(inv);
+            if (result == JFileChooser.APPROVE_OPTION) {
+                File headerFile = fc.getSelectedFile();
+                String path = headerFile.getAbsolutePath();
+                Path headerP = Paths.get(path);
+                List<String> head = Files.lines(headerP).collect(Collectors.toList());//read file and return stream and convert to list
+                ArrayList<InvoiceHeader> invList = new ArrayList<>();
+                for (String headerLine : head) {
+                    String[] part = headerLine.split(",");
+                    int id = Integer.parseInt(part[0]);
+                    InvoiceHeader invHeader = new InvoiceHeader(id, part[2], part[1]);
+                    invList.add(invHeader);
+                }
+                result = fc.showOpenDialog(inv);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    File lineFile = fc.getSelectedFile();
+                    String Lpath = lineFile.getAbsolutePath();
+                    Path lineP = Paths.get(Lpath);
+                    List<String> line = Files.lines(lineP).collect(Collectors.toList());//read file and return stream and convert to list
+                    for (String LineL : line) {
+                        String[] part = LineL.split(",");
+                        int invid = Integer.parseInt(part[0]);
+                        double price = Double.parseDouble(part[2]);
+                        int count = Integer.parseInt(part[3]);
+                        InvoiceHeader in = read(invList, invid);
+                        InvoiceLine invLine = new InvoiceLine(in, part[1], price, count);
+                        in.getLines().add(invLine);
 
-            while (rows.hasNext()) {
-                String[] cols = rows.next();
-                data.add(cols);
+                    }
+                    inv.setInvList(invList);
+                }
+
             }
-            System.out.println(data.size());
-        }catch(Exception ex){
+        } catch (IOException ex) {
             ex.printStackTrace();
-            return new ArrayList<>();
         }
-        return data;
 
     }
+
+    private InvoiceHeader read(ArrayList<InvoiceHeader> inv, int id) {
+        for (InvoiceHeader invv : inv) {
+            if (invv.getNum() == id) {
+                return invv;
+            }
+        }
+        return null;
+    }
+    
+    @Override
+        public void valueChanged(ListSelectionEvent lse) {
+             System.out.println("selected");
+             int selectedRow=inv.getInvoHeader().getSelectedRow();
+             System.out.println(selectedRow);
+             ArrayList<InvoiceLine> lines=inv.getInvList().get(selectedRow).getLines();
+             inv.getInvoLine().setModel(new InvoiceLineTable(lines));
+        }
+
+    private void saveFile() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+}
+
+   /* private ArrayList<String[]> readCSV(File file) {
+            ArrayList<String[]> data = new ArrayList<>();
+            try {
+                FileReader filereader = new FileReader(file);
+                CSVReader csvreader = new CSVReader(filereader);
+                Iterator<String[]> rows = csvreader.iterator();
+
+                while (rows.hasNext()) {
+                    String[] cols = rows.next();
+                    data.add(cols);
+                }
+                System.out.println(data.size());
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                return new ArrayList<>();
+            }
+            return data;
+
+        }*/
 
     /*private void saveFile() {
         JFileChooser fc = new JFileChooser();
@@ -146,4 +201,4 @@ public class ActionHandler implements ActionListener {
         }
 
     }*/
-}
+    

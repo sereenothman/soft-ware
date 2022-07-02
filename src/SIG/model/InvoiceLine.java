@@ -10,23 +10,23 @@ package SIG.model;
  * @author seren
  */
 public class InvoiceLine {
-    private InvouceHeader invoice ; 
+    private InvoiceHeader invoice ; 
     private String name;
     private double price ;
     private int count ;
 
-    public InvoiceLine(InvouceHeader invoice, String name, double price, int count) {
+    public InvoiceLine(InvoiceHeader invoice, String name, double price, int count) {
         this.invoice = invoice;
         this.name = name;
         this.price = price;
         this.count = count;
     }
 
-    public InvouceHeader getInvoice() {
+    public InvoiceHeader getInvoice() {
         return invoice;
     }
 
-    public void setInvoice(InvouceHeader invoice) {
+    public void setInvoice(InvoiceHeader invoice) {
         this.invoice = invoice;
     }
 
@@ -50,10 +50,17 @@ public class InvoiceLine {
         return count;
     }
 
+    @Override
+    public String toString() {
+        return "InvoiceLine{" + "invoice=" + invoice + ", name=" + name + ", price=" + price + ", count=" + count + '}';
+    }
+
     public void setCount(int count) {
         this.count = count;
     }
     
-    
+    public double LineTotal() {
+        return count*price;
+    }
     
 }
