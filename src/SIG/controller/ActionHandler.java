@@ -81,7 +81,7 @@ public class ActionHandler implements ActionListener, ListSelectionListener {
     private void deleteInvoice() {
         int selectedRow=inv.getInvoHeader().getSelectedRow();
         ArrayList<InvoiceHeader> invList = new ArrayList<>();
-        invList.remove(selectedRow);
+        invList.remove(selectedRow); // will be completed
         
     }
 
